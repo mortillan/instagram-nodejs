@@ -457,11 +457,28 @@ module.exports = class Instagram {
     * @param {Int} items (default - 10)
     * @return {Object} Promise
   */
-  getFeed(items, cursor) {
-    items = items ? items : 10;
-    return fetch('https://www.instagram.com/graphql/query/?query_id=17866917712078875&fetch_media_item_count=' + items + '&fetch_media_item_cursor=' + cursor + '&fetch_comment_count=4&fetch_like=10',
+  getFeed(items = 10, cursor) {
+    const gqlVars = {
+      // cached_feed_item_ids: [],
+      fetch_media_item_count: items,
+      fetch_media_item_cursor: cursor,
+      // fetch_comment_count:4,
+      // fetch_like:3,
+      // has_stories:false,
+      // has_threaded_comments:true,
+    }
+
+    // {"cached_feed_item_ids":[],"fetch_media_item_count":12,"fetch_media_item_cursor":"KGEAhFCAQu_Wax1GGCLLBd5qHcsFAsfWbGwdS1UXhHP4aB3S-IFfYEZqHVJ1HGWdVGsdW8uEZmK_ax0ubChVlE0AAPFiBjC2HWsdOJ4ewkXBaB17awNZFvxqHT2_tge5RQAAFuaQvPGaWyoUBAA=","fetch_comment_count":4,"fetch_like":3,"has_stories":false,"has_threaded_comments":true}
+
+    return fetch('https://www.instagram.com/graphql/query/?query_hash=08574cc2c79c937fbb6da1c0972c7b39&variables=' + encodeURIComponent(JSON.stringify(gqlVars)),
       {
-        headers: this.getHeaders(),
+        headers: this.combineWithBaseHeader(
+          {
+            'accept': '*/*',
+            'accept-encoding': 'gzip, deflate, br',
+            'cookie': this.generateCookie()
+          }
+        ),
       }).then(t =>
         // console.log(t)
         t.json().then(r => r)
