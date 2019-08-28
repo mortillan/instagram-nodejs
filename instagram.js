@@ -334,35 +334,81 @@ module.exports = class Instagram {
 
 
   /**
-    * I did not want to implement this, but I need a stars on github
-    * If you use this library - star this rep https://github.com/yatsenkolesh/instagram-nodejs
-    * Thank you, bro
     * Follow/unfollow user by id
     * @param {int} userID
     * @param {boolean} isUnfollow
     * @return {object} Promise of fetch request
   */
-  follow(userId, isUnfollow) {
-    const headers =
-    {
-      'referer': 'https://www.instagram.com/',
-      'origin': 'https://www.instagram.com',
-      'user-agent': this.userAgent,
-      'x-instagram-ajax': '1',
-      'content-type': 'application/json',
-      'x-requested-with': 'XMLHttpRequest',
-      'x-csrftoken': undefined,
-      cookie: ' sessionid=' + this.sessionId + '; csrftoken=' + this.csrfToken + '; mid=WPL0LQAEAAGG3XL5-xHXzClnpqA3; rur=ASH; mid=WRN1_AAEAAE07QksztCl3OCnLj8Y;'
-    }
-
-    return fetch('https://www.instagram.com/web/friendships/' + userId + (isUnfollow == 1 ? '/unfollow' : '/follow'),
+  follow(userId) {
+    return fetch('https://www.instagram.com/web/friendships/' + userId + '/follow',
       {
         'method': 'post',
         'headers': this.getHeaders()//headers
       }).then(res => {
-        return res
-      })
+        return res;
+      });
   }
+
+    /**
+      * Follow/unfollow user by id
+      * @param {int} userID
+      * @param {boolean} isUnfollow
+      * @return {object} Promise of fetch request
+    */
+    unfollow(userId) {
+      return fetch('https://www.instagram.com/web/friendships/' + userId + '/unfollow',
+        {
+          'method': 'post',
+          'headers': this.getHeaders()//headers
+        }).then(res => {
+          return res;
+        });
+    }
+
+  followHashtags(hashTags) {
+      return fetch('https://www.instagram.com/web/tags/follow/' + hashTags,
+      {
+        'method': 'post',
+        'headers': this.getHeaders()//headers
+      }).then(res => {
+        return res;
+      });
+  }
+
+  unfollowHashtags(hashTags) {
+      return fetch('https://www.instagram.com/web/tags/unfollow/' + hashTags,
+      {
+        'method': 'post',
+        'headers': this.getHeaders()//headers
+      }).then(res => {
+        return res;
+      });
+  }
+
+    getCommentsByPostId(postId){
+        var fetch_data = {
+        'method': 'get',
+        'headers':
+          this.combineWithBaseHeader(
+            {
+              'accept': 'text/html,application/xhtml+xml,application/xml;q0.9,image/webp,image/apng,*.*;q=0.8',
+              'accept-encoding': 'gzip, deflate, br',
+              'cookie': this.generateCookie()
+            }
+          )
+        }
+
+        return fetch('https://www.instagram.com/p/' + postId, fetch_data).then(res => res.text().then(function (data) {
+            const regex = /window\._sharedData = (.*);<\/script>/;
+            const match = regex.exec(data);
+            if (typeof match[1] === 'undefined') {
+              return '';
+            }
+            return JSON.parse(match[1]).entry_data.PostPage[0].graphql.shortcode_media.edge_media_to_parent_comment;
+//            return JSON.parse(match[1]);
+        }));
+    }
+
 
   /**
     * @return {Object} default headers
