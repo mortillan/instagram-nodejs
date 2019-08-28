@@ -24,15 +24,15 @@ module.exports = class Instagram {
     this.searchTypes = ['location', 'hashtag']
 
     this.essentialValues = {
-      sessionid   : undefined,
-      ds_user_id  : undefined,
-      csrftoken   : undefined,
-      shbid       : undefined,
-      rur         : undefined,
-      mid         : undefined,
-      shbts       : undefined,
-      mcd         : undefined,
-      ig_cb       : 1,
+      sessionid: undefined,
+      ds_user_id: undefined,
+      csrftoken: undefined,
+      shbid: undefined,
+      rur: undefined,
+      mid: undefined,
+      shbts: undefined,
+      mcd: undefined,
+      ig_cb: 1,
       //urlgen      : undefined //this needs to be filled in according to my RE
     };
 
@@ -41,17 +41,17 @@ module.exports = class Instagram {
       'origin': 'https://www.instagram.com',
       'referer': 'https://www.instagram.com/',
       'upgrade-insecure-requests': '1',
-      'user-agent': this.userAgent,    
+      'user-agent': this.userAgent,
     }
   }
 
-  
-  generateCookie(simple){
+
+  generateCookie(simple) {
     if (simple) return 'ig_cb=1'
 
     var cookie = ''
     var keys = Object.keys(this.essentialValues)
-    for (var i = 0; i < keys.length; i++){
+    for (var i = 0; i < keys.length; i++) {
       var key = keys[i];
       if (this.essentialValues[key] !== undefined) {
         cookie += key + '=' + this.essentialValues[key] + (i < keys.length - 1 ? '; ' : '')
@@ -61,40 +61,40 @@ module.exports = class Instagram {
     return cookie;
   }
 
-  combineWithBaseHeader(data){
+  combineWithBaseHeader(data) {
     return Object.assign(this.baseHeader, data)
   }
 
-  updateEssentialValues(src, isHTML){
+  updateEssentialValues(src, isHTML) {
     //assumes that essential values will be extracted from a cookie unless specified by the isHTML bool
 
-    if (!isHTML){
+    if (!isHTML) {
       var keys = Object.keys(this.essentialValues)
 
-        for (var i = 0; i < keys.length; i++){
-          var key = keys[i];
-          if (!this.essentialValues[key])
-            for (let cookie in src)
-              if (src[cookie].includes(key) && !src[cookie].includes(key + '=""')){
-                var cookieValue = src[cookie].split(';')[0].replace(key + '=', '')
-                this.essentialValues[key] = cookieValue
-                break;
-              }
-        }
-      } else {
-        var subStr = src;
-
-        var startStr = '<script type="text/javascript">window._sharedData = ';
-        var start = subStr.indexOf(startStr) + startStr.length;
-        subStr = subStr.substr(start, subStr.length);
-        
-        subStr = subStr.substr(0, subStr.indexOf('</script>') - 1);
-
-        var json = JSON.parse(subStr);
-
-        this.essentialValues.csrftoken = json.config.csrf_token;
-        this.rollout_hash = json.rollout_hash;
+      for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        if (!this.essentialValues[key])
+          for (let cookie in src)
+            if (src[cookie].includes(key) && !src[cookie].includes(key + '=""')) {
+              var cookieValue = src[cookie].split(';')[0].replace(key + '=', '')
+              this.essentialValues[key] = cookieValue
+              break;
+            }
       }
+    } else {
+      var subStr = src;
+
+      var startStr = '<script type="text/javascript">window._sharedData = ';
+      var start = subStr.indexOf(startStr) + startStr.length;
+      subStr = subStr.substr(start, subStr.length);
+
+      subStr = subStr.substr(0, subStr.indexOf('</script>') - 1);
+
+      var json = JSON.parse(subStr);
+
+      this.essentialValues.csrftoken = json.config.csrf_token;
+      this.rollout_hash = json.rollout_hash;
+    }
   }
 
   /**
@@ -103,7 +103,7 @@ module.exports = class Instagram {
     * @return {Object} Promise
   */
   getUserDataByUsername(username) {
-    
+
     var fetch_data = {
       'method': 'get',
       'headers':
@@ -115,10 +115,10 @@ module.exports = class Instagram {
           }
         )
     }
-    
+
     return fetch('https://www.instagram.com/' + username, fetch_data).then(res => res.text().then(function (data) {
       console.log(data)
-    
+
       const regex = /window\._sharedData = (.*);<\/script>/;
       const match = regex.exec(data);
       if (typeof match[1] === 'undefined') {
@@ -247,10 +247,10 @@ module.exports = class Instagram {
               'cookie': this.generateCookie(true)
             }
           )
-      }).then( t => {
+      }).then(t => {
         this.updateEssentialValues(t.headers._headers['set-cookie'])
         return t.text()
-      }).then( html => {
+      }).then(html => {
         this.updateEssentialValues(html, true)
         return this.essentialValues.csrftoken
       }).catch(() =>
@@ -264,35 +264,35 @@ module.exports = class Instagram {
     * @param {String} password
     * @return {Object} Promise
   */
- auth(username, password) {
-  var formdata = 'username=' + username + '&password=' + password + '&queryParams=%7B%7D'
+  auth(username, password) {
+    var formdata = 'username=' + username + '&password=' + password + '&queryParams=%7B%7D'
 
-  var options = {
-    method  : 'POST',
-    body    : formdata,
-    headers : 
-      this.combineWithBaseHeader(
-        {
-          'accept'            : '*/*',
-          'accept-encoding'   : 'gzip, deflate, br',
-          'content-length'    : formdata.length,
-          'content-type'      : 'application/x-www-form-urlencoded',
-          'cookie'            : 'ig_cb=' + this.essentialValues.ig_cb,
-          'x-csrftoken'       : this.csrfToken,
-          'x-instagram-ajax'  : this.rollout_hash,
-          'x-requested-with'  : 'XMLHttpRequest',
-        }
+    var options = {
+      method: 'POST',
+      body: formdata,
+      headers:
+        this.combineWithBaseHeader(
+          {
+            'accept': '*/*',
+            'accept-encoding': 'gzip, deflate, br',
+            'content-length': formdata.length,
+            'content-type': 'application/x-www-form-urlencoded',
+            'cookie': 'ig_cb=' + this.essentialValues.ig_cb,
+            'x-csrftoken': this.csrfToken,
+            'x-instagram-ajax': this.rollout_hash,
+            'x-requested-with': 'XMLHttpRequest',
+          }
+        )
+    }
+
+    return fetch('https://www.instagram.com/accounts/login/ajax/', options).then(
+      t => {
+        this.updateEssentialValues(t.headers._headers['set-cookie'])
+        return this.essentialValues.sessionid;
+      }).catch(() =>
+        console.log('Instagram authentication failed (challenge required erro)')
       )
   }
-
-  return fetch('https://www.instagram.com/accounts/login/ajax/', options).then(
-    t => {
-      this.updateEssentialValues(t.headers._headers['set-cookie'])
-      return this.essentialValues.sessionid;
-    }).catch(() =>
-      console.log('Instagram authentication failed (challenge required erro)')
-    )
-}
 
   /**
       * Registration for instagram, returning true or false
@@ -349,24 +349,24 @@ module.exports = class Instagram {
       });
   }
 
-    /**
-      * Follow/unfollow user by id
-      * @param {int} userID
-      * @param {boolean} isUnfollow
-      * @return {object} Promise of fetch request
-    */
-    unfollow(userId) {
-      return fetch('https://www.instagram.com/web/friendships/' + userId + '/unfollow',
-        {
-          'method': 'post',
-          'headers': this.getHeaders()//headers
-        }).then(res => {
-          return res;
-        });
-    }
+  /**
+    * Follow/unfollow user by id
+    * @param {int} userID
+    * @param {boolean} isUnfollow
+    * @return {object} Promise of fetch request
+  */
+  unfollow(userId) {
+    return fetch('https://www.instagram.com/web/friendships/' + userId + '/unfollow',
+      {
+        'method': 'post',
+        'headers': this.getHeaders()//headers
+      }).then(res => {
+        return res;
+      });
+  }
 
   followHashtags(hashTags) {
-      return fetch('https://www.instagram.com/web/tags/follow/' + hashTags,
+    return fetch('https://www.instagram.com/web/tags/follow/' + hashTags,
       {
         'method': 'post',
         'headers': this.getHeaders()//headers
@@ -376,7 +376,7 @@ module.exports = class Instagram {
   }
 
   unfollowHashtags(hashTags) {
-      return fetch('https://www.instagram.com/web/tags/unfollow/' + hashTags,
+    return fetch('https://www.instagram.com/web/tags/unfollow/' + hashTags,
       {
         'method': 'post',
         'headers': this.getHeaders()//headers
@@ -385,29 +385,29 @@ module.exports = class Instagram {
       });
   }
 
-    getCommentsByPostId(postId){
-        var fetch_data = {
-        'method': 'get',
-        'headers':
-          this.combineWithBaseHeader(
-            {
-              'accept': 'text/html,application/xhtml+xml,application/xml;q0.9,image/webp,image/apng,*.*;q=0.8',
-              'accept-encoding': 'gzip, deflate, br',
-              'cookie': this.generateCookie()
-            }
-          )
-        }
-
-        return fetch('https://www.instagram.com/p/' + postId, fetch_data).then(res => res.text().then(function (data) {
-            const regex = /window\._sharedData = (.*);<\/script>/;
-            const match = regex.exec(data);
-            if (typeof match[1] === 'undefined') {
-              return '';
-            }
-            return JSON.parse(match[1]).entry_data.PostPage[0].graphql.shortcode_media.edge_media_to_parent_comment;
-//            return JSON.parse(match[1]);
-        }));
+  getCommentsByPostId(postId) {
+    var fetch_data = {
+      'method': 'get',
+      'headers':
+        this.combineWithBaseHeader(
+          {
+            'accept': 'text/html,application/xhtml+xml,application/xml;q0.9,image/webp,image/apng,*.*;q=0.8',
+            'accept-encoding': 'gzip, deflate, br',
+            'cookie': this.generateCookie()
+          }
+        )
     }
+
+    return fetch('https://www.instagram.com/p/' + postId, fetch_data).then(res => res.text().then(function (data) {
+      const regex = /window\._sharedData = (.*);<\/script>/;
+      const match = regex.exec(data);
+      if (typeof match[1] === 'undefined') {
+        return '';
+      }
+      return JSON.parse(match[1]).entry_data.PostPage[0].graphql.shortcode_media.edge_media_to_parent_comment;
+      //            return JSON.parse(match[1]);
+    }));
+  }
 
 
   /**
@@ -663,5 +663,19 @@ module.exports = class Instagram {
       {
         headers: this.getHeaders() // no required
       }).then(t => t.json().then(r => r))
+  }
+
+  async getLikersByPostId(postId, limit = 10) {
+    const gqlVars = {
+      shortcode: postId,
+      include_reel: true,
+      first: limit,
+    }
+
+    return await fetch('https://www.instagram.com/graphql/query/?query_hash=d5d763b1e2acf209d62d22d184488e57&variables=' + encodeURIComponent(JSON.stringify(gqlVars)),
+      {
+        headers: this.getHeaders()
+      })
+      .then(r => r.json());
   }
 }
