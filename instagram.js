@@ -528,6 +528,39 @@ module.exports = class Instagram {
       )
   }
 
+  /**
+    * Attention: postId need transfer only as String (reason int have max value - 2147483647)
+    * @example postID - '1510335854710027921'
+    * @param {String} post id
+    * @return {Object} Promse
+  */
+  likeComment(commentId) {
+    return fetch('https://www.instagram.com/web/comments/like/' + commentId,
+      {
+        'method': 'POST',
+        'headers': this.getHeaders()
+      }).then(t =>
+        t.json().then(r => r)
+      )
+  }
+
+  /**
+    * Attention: postId need transfer only as String (reason int have max value - 2147483647)
+    * @example postID - '1510335854710027921'
+    * @param {String} postId
+    * @return {Object} Promse
+  */
+  unlikeComment(commentId) {
+    return fetch('https://www.instagram.com/web/comments/unlike/' + commentId,
+      {
+        'method': 'POST',
+        'headers': this.getHeaders()
+      }).then(t =>
+        t.json().then(r => r)
+      )
+  }
+
+
 
   /**
     * @example url = https://www.instagram.com/p/BT1ynUvhvaR/
@@ -680,6 +713,17 @@ module.exports = class Instagram {
       {
         headers: this.getHeaders() // no required
       }).then(t => t.json().then(r => r))
+  }
+
+  /**
+    * Simple variable for get next page
+    * @param {Object} json contents from this.getFeed
+    * @return {String} if next page is not exists - false
+  */
+  getNextPageCursor(json) {
+    let page = json.page_info
+
+    return page.has_next_page ? page.end_cursor : false
   }
 
   async getLikersByPostId(postId, limit = 10) {
