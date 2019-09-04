@@ -198,6 +198,9 @@ module.exports = class Instagram {
           }
 
           if (json.status == 'ok') {
+              return json;
+              
+              
             self.userIdFollowers[userId] = self.userIdFollowers[userId].concat(json.data.user.edge_followed_by.edges)
 
             if (json.data.user.edge_followed_by.page_info.has_next_page) {
@@ -462,7 +465,7 @@ module.exports = class Instagram {
       // cached_feed_item_ids: [],
       fetch_media_item_count: items,
       fetch_media_item_cursor: cursor,
-      // fetch_comment_count:4,
+       fetch_comment_count:10,
       // fetch_like:3,
       // has_stories:false,
       // has_threaded_comments:true,
@@ -534,11 +537,18 @@ module.exports = class Instagram {
     * @param {String} post id
     * @return {Object} Promse
   */
-  likeComment(commentId) {
+  likeComment(commentId, shortcode) {
     return fetch('https://www.instagram.com/web/comments/like/' + commentId,
       {
         'method': 'POST',
-        'headers': this.getHeaders()
+        'headers': this.combineWithBaseHeader(
+                        {
+                          'accept': '*/*',
+                          'accept-encoding': 'gzip, deflate, br',
+                          'referer' : 'https://www.instagram.com/p/'+shortcode,
+                          'cookie': this.generateCookie()
+                        }
+                    )
       }).then(t =>
         t.json().then(r => r)
       )
