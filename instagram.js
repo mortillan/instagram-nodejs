@@ -538,14 +538,17 @@ module.exports = class Instagram {
     * @return {Object} Promse
   */
   likeComment(commentId, shortcode) {
-    return fetch('https://www.instagram.com/web/comments/like/' + commentId,
+    return fetch('https://www.instagram.com/web/comments/like/' + commentId + '/',
       {
         'method': 'POST',
         'headers': this.combineWithBaseHeader(
                         {
                           'accept': '*/*',
                           'accept-encoding': 'gzip, deflate, br',
-                          'referer' : 'https://www.instagram.com/p/'+shortcode,
+                          'content-type': 'application/x-www-form-urlencode',
+                          'x-requested-with': 'XMLHttpRequest',
+                          'x-csrftoken': this.csrfToken,
+                          'referer' : 'https://www.instagram.com/p/' + shortcode + '/',
                           'cookie': this.generateCookie()
                         }
                     )
