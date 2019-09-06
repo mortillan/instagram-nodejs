@@ -97,6 +97,27 @@ module.exports = class Instagram {
     }
   }
 
+
+ getMyProfile(userId){
+    const gqlVars = {
+      userId: userId,
+      include_reel: true
+    };
+    return fetch('https://www.instagram.com/graphql/query/?query_hash=aec5501414615eca36a9acf075655b1e&variables=' + encodeURIComponent(JSON.stringify(gqlVars)),
+      {
+        headers: this.combineWithBaseHeader(
+          {
+            'accept': '*/*',
+            'accept-encoding': 'gzip, deflate, br',
+            'cookie': this.generateCookie()
+          }
+        )
+      }).then(t =>
+        // console.log(t)
+        t.json().then(r => r)
+      );
+ }
+
   /**
     * User data by username
     * @param {String} username
@@ -111,21 +132,17 @@ module.exports = class Instagram {
           {
             'accept': 'text/html,application/xhtml+xml,application/xml;q0.9,image/webp,image/apng,*.*;q=0.8',
             'accept-encoding': 'gzip, deflate, br',
-            'cookie': this.generateCookie()
+            'cookie': this.generateCookie(),
+            'referer' : 'https://www.instagram.com/' + username
           }
         )
     }
 
-    return fetch('https://www.instagram.com/' + username, fetch_data).then(res => res.text().then(function (data) {
-      console.log(data)
-
-      const regex = /window\._sharedData = (.*);<\/script>/;
-      const match = regex.exec(data);
-      if (typeof match[1] === 'undefined') {
-        return '';
-      }
-      return JSON.parse(match[1]).entry_data.ProfilePage[0];
-    }))
+    return fetch('https://www.instagram.com/' + username + "/?__a=1", fetch_data)
+            .then(t =>
+                // console.log(t)
+                t.json().then(r => r)
+            );
   }
 
   /**
@@ -342,11 +359,21 @@ module.exports = class Instagram {
     * @param {boolean} isUnfollow
     * @return {object} Promise of fetch request
   */
-  follow(userId) {
-    return fetch('https://www.instagram.com/web/friendships/' + userId + '/follow',
+  follow(userId, username = null) {
+    return fetch('https://www.instagram.com/web/friendships/' + userId + '/follow/',
       {
-        'method': 'post',
-        'headers': this.getHeaders()//headers
+        'method': 'POST',
+        'headers': this.combineWithBaseHeader(
+                        {
+                          'accept': '*/*',
+                          'accept-encoding': 'gzip, deflate, br',
+                          'content-type': 'application/x-www-form-urlencode',
+                          'x-requested-with': 'XMLHttpRequest',
+                          'x-csrftoken': this.csrfToken,
+                          'referer' : username ? 'https://www.instagram.com/' + username : 'https://www.instagram.com',
+                          'cookie': this.generateCookie()
+                        }
+                    )
       }).then(res => {
         return res;
       });
@@ -358,14 +385,24 @@ module.exports = class Instagram {
     * @param {boolean} isUnfollow
     * @return {object} Promise of fetch request
   */
-  unfollow(userId) {
-    return fetch('https://www.instagram.com/web/friendships/' + userId + '/unfollow',
+  unfollow(userId, username = null) {
+    return fetch('https://www.instagram.com/web/friendships/' + userId + '/unfollow/',
       {
-        'method': 'post',
-        'headers': this.getHeaders()//headers
-      }).then(res => {
-        return res;
-      });
+        'method': 'POST',
+        'headers': this.combineWithBaseHeader(
+                        {
+                          'accept': '*/*',
+                          'accept-encoding': 'gzip, deflate, br',
+                          'content-type': 'application/x-www-form-urlencode',
+                          'x-requested-with': 'XMLHttpRequest',
+                          'x-csrftoken': this.csrfToken,
+                          'referer' : username ? 'https://www.instagram.com/' + username : 'https://www.instagram.com',
+                          'cookie': this.generateCookie()
+                        }
+                    )
+      }).then(t =>
+        t.json().then(r => r)
+      )
   }
 
   followHashtags(hashTags) {
