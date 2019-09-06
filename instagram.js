@@ -789,4 +789,20 @@ module.exports = class Instagram {
       })
       .then(r => r.json());
   }
+  
+  getPlaces(q, rankToken = null) {
+    const rankTokenQuery = rankToken ? '&rank_token=' + rankToken : '';
+
+      return fetch('https://www.instagram.com/web/search/topsearch/?context=place&query=' + q + rankTokenQuery,
+      {
+        headers: this.getHeaders() // no required
+      }).then(t => t.json().then(r => r));
+  }
+  
+  getPostByLocation(id, slug) {
+      return fetch('https://www.instagram.com/explore/locations/'+id+'/'+slug+'/?__a=1',
+      {
+        headers: this.getHeaders() // no required
+      }).then(t => t.json().then(r => r));
+  }
 }
