@@ -400,9 +400,9 @@ module.exports = class Instagram {
                           'cookie': this.generateCookie()
                         }
                     )
-      }).then(t =>
-        t.json().then(r => r)
-      )
+      }).then(res => {
+        return res;
+      });
   }
 
   followHashtags(hashTags) {
