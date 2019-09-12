@@ -165,30 +165,18 @@ module.exports = class Instagram {
     * @param {Boolean} selfSelf if call by self
     * @return {Object} array followers list
   */
-  getUserFollowers(userId, endCursor, count, followersCounter, selfSelf) {
-    const self = this
-
-    if (!selfSelf)
-      self.userIdFollowers[userId] = []
-
-    if (typeof self.receivePromises[userId] !== 'undefined' && !selfSelf)
-      return 0
-
-    count = count || 20;
-
+  getUserFollowers(userId, endCursor, count) {
+    const self = this;
+    count = count || 24;
     const query = {
       id: userId,
-      include_reel: true,
-      fetch_mutual: true,
       first: count
     };
     if (endCursor) {
       query.after = endCursor;
     }
-
     const variables = encodeURIComponent(JSON.stringify(query));
 
-    self.receivePromises[userId] = 1
     return fetch('https://www.instagram.com/graphql/query/?query_hash=56066f031e6239f35a904ac20c9f37d9&variables=' + variables,
       {
         'method': 'get',
@@ -213,38 +201,52 @@ module.exports = class Instagram {
             console.log(response)
             return [];
           }
+          return json;
+        }).catch((e) => {
+          console.log('Instagram returned:' + e)
+        })
+      })
+  }
 
-          if (json.status == 'ok') {
-              return json;
-              
-              
-            self.userIdFollowers[userId] = self.userIdFollowers[userId].concat(json.data.user.edge_followed_by.edges)
+  getPostsFromHashtag(tagName, endCursor, count){
+    const self = this;
+    count = count || 12;
 
-            if (json.data.user.edge_followed_by.page_info.has_next_page) {
-              let end_cursor = json.data.user.edge_followed_by.page_info.end_cursor
-              return new Promise((resolve) => {
-                console.log('fetching next page in ' + this.paginationDelay / 1000 + ' seconds');
-                setTimeout(() => {
-                  resolve(self.getUserFollowers(userId, end_cursor, count, 1, 1));
-                }, this.paginationDelay);
-              });
+    const query = {
+      tag_name: tagName,
+      first: count,
+      locations: "show"
+    };
+    if (endCursor) {
+      query.after = endCursor;
+    }
+
+    const variables = encodeURIComponent(JSON.stringify(query));
+    return fetch('https://www.instagram.com/graphql/query/?query_hash=174a5243287c5f3a7de741089750ab3b&variables=' + variables,
+      {
+        'method': 'get',
+        'headers':
+          this.combineWithBaseHeader(
+            {
+              'accept': 'text/html,application/xhtml+xml,application/xml;q0.9,image/webp,image/apng,*.*;q=0.8',
+              'accept-encoding': 'gzip, deflate, br',
+              'cookie': this.generateCookie()
             }
-            else {
-              self.receivePromises[userId] = undefined
-              return self.userIdFollowers[userId]
-            }
+          )
+      }).then(res => {
+        return res.text().then((response) => {
+          //prepare convert to json
+          let json = response;
 
+          try {
+            json = JSON.parse(response)
           }
-          else {
-            return new Promise((resolve) => {
-              console.log(json);
-              console.log('request failed, retrying in ' + this.paginationDelay / 1000 + ' seconds');
-              setTimeout(() => {
-                resolve(self.getUserFollowers(userId, endCursor, count, followersCounter, selfSelf));
-              }, this.paginationDelay);
-            });
+          catch (e) {
+            console.log('Session error')
+            console.log(response)
+            return [];
           }
-
+          return json;
         }).catch((e) => {
           console.log('Instagram returned:' + e)
         })
@@ -403,7 +405,7 @@ module.exports = class Instagram {
       }).then(res => {
         return res;
       });
-  }
+  } 
 
   followHashtags(hashTags) {
     return fetch('https://www.instagram.com/web/tags/follow/' + hashTags,
@@ -799,10 +801,32 @@ module.exports = class Instagram {
       }).then(t => t.json().then(r => r));
   }
   
-  getPostByLocation(id, slug) {
-      return fetch('https://www.instagram.com/explore/locations/'+id+'/'+slug+'/?__a=1',
-      {
-        headers: this.getHeaders() // no required
-      }).then(t => t.json().then(r => r));
+  getPostByLocation(locationId, endCursor, count) {
+    count = count || 12;
+
+    const query = {
+      id: locationId,
+      after: endCursor,
+      first: count,
+    }
+
+    if (endCursor) {
+      query.after = endCursor;
+    }
+
+    return fetch('https://www.instagram.com/graphql/query/?query_hash=1b84447a4d8b6d6d0426fefb34514485&variables=' + encodeURIComponent(JSON.stringify(query)),
+    {
+      headers: this.getHeaders()
+    }).then(r => r.json());
+  }
+
+  getPostDetails(shortcode) {
+    const query = {
+      shortcode: shortcode
+    }
+    return fetch('https://www.instagram.com/graphql/query/?query_hash=865589822932d1b43dfe312121dd353a&variables=' + encodeURIComponent(JSON.stringify(query)),
+    {
+      headers: this.getHeaders()
+    }).then(r => r.json());
   }
 }
