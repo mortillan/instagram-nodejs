@@ -504,7 +504,7 @@ module.exports = class Instagram {
       // cached_feed_item_ids: [],
       fetch_media_item_count: items,
       fetch_media_item_cursor: cursor,
-       fetch_comment_count:10,
+      // fetch_comment_count:10,
       // fetch_like:3,
       // has_stories:false,
       // has_threaded_comments:true,
@@ -544,11 +544,21 @@ module.exports = class Instagram {
     * @param {String} post id
     * @return {Object} Promse
   */
-  like(postId) {
+  like(postId, shortcode = null) {
     return fetch('https://www.instagram.com/web/likes/' + postId + '/like/',
       {
         'method': 'POST',
-        'headers': this.getHeaders()
+        'headers': this.combineWithBaseHeader(
+                        {
+                          'accept': '*/*',
+                          'accept-encoding': 'gzip, deflate, br',
+                          'content-type': 'application/x-www-form-urlencode',
+                          'x-requested-with': 'XMLHttpRequest',
+                          'x-csrftoken': this.csrfToken,
+                          'referer' : shortcode ? 'https://www.instagram.com/p/' + shortcode + '/' : 'https://www.instagram.com',
+                          'cookie': this.generateCookie()
+                        }
+                    )
       }).then(t =>
         t.json().then(r => r)
       )
@@ -792,6 +802,15 @@ module.exports = class Instagram {
       .then(r => r.json());
   }
   
+  searchBar(q, context = null, rankToken = null) {
+    const rankTokenQuery = rankToken ? '&rank_token=' + rankToken : '';
+
+      return fetch('https://www.instagram.com/web/search/topsearch/?context='+(context ? context : 'blended')+'&query=' + q + rankTokenQuery,
+      {
+        headers: this.getHeaders() // no required
+      }).then(t => t.json().then(r => r));
+  }
+
   getPlaces(q, rankToken = null) {
     const rankTokenQuery = rankToken ? '&rank_token=' + rankToken : '';
 
