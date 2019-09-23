@@ -22,6 +22,10 @@ module.exports = class Instagram {
     this.paginationDelay = 30000
     this.receivePromises = {}
     this.searchTypes = ['location', 'hashtag']
+    this.twoFactorRequired = false;
+    this.lastFourDigit = undefined;
+    this.twoFactorIdentifier = undefined;
+    this.username = undefined;
 
     this.essentialValues = {
       sessionid: undefined,
@@ -287,7 +291,7 @@ module.exports = class Instagram {
     * @return {Object} Promise
   */
   auth(username, password) {
-    var formdata = 'username=' + username + '&password=' + password + '&queryParams=%7B%7D'
+    var formdata = 'username=' + username + '&password=' + password + '&queryParams=%7B%22source%22%3A%22auth_switcher%22%7D' + '&optIntoOneTap=false'
 
     var options = {
       method: 'POST',
@@ -308,9 +312,32 @@ module.exports = class Instagram {
     }
 
     return fetch('https://www.instagram.com/accounts/login/ajax/', options).then(
-      t => {
-        this.updateEssentialValues(t.headers._headers['set-cookie'])
-        return this.essentialValues.sessionid;
+      async (t) => {
+        await this.updateEssentialValues(t.headers._headers['set-cookie']);
+        // 2FA
+        let response = await t.json();
+        if ( t.status == 400 ) {
+          if ( response.two_factor_required ) {
+            this.twoFactorRequired = true;
+            this.lastFourDigit = response.two_factor_info.obfuscated_phone_number;
+            this.twoFactorIdentifier = response.two_factor_info.two_factor_identifier;
+          } else {
+            return response;
+          }
+        }
+        if ( ("authenticated" in response && response.authenticated == false) 
+          || ("user" in response && response.user == false) ) {
+          return {
+            status : "fail",
+            error_type : "user_not_found",
+            message : "Username or password is incorrect!"
+          }
+        } else {
+          return {
+            status : "success",
+            sessionId : this.essentialValues.sessionid
+          };
+        }
       }).catch(() =>
         console.log('Instagram authentication failed (challenge required erro)')
       )
@@ -847,5 +874,26 @@ module.exports = class Instagram {
     {
       headers: this.getHeaders()
     }).then(r => r.json());
+  }
+
+  twoFactorAuth(code, essentialValues) {
+    console.log(code);
+    console.log(essentialValues);
+    var formdata = 'username=' + essentialValues.username + '&verificationCode=' + code + '&identifier=' + essentialValues.twoFactorIdentifier
+
+    var options = {
+      method: 'POST',
+      body: formdata,
+      headers: essentialValues
+    }
+
+    return fetch('https://www.instagram.com/accounts/login/ajax/two_factor/', options).then(
+      async (t) => {
+        console.log(await t.json());
+        await this.updateEssentialValues(t.headers._headers['set-cookie']);
+        return this.essentialValues;
+      }).catch(() =>
+        console.log('Instagram authentication failed (challenge required erro)')
+      )
   }
 }
