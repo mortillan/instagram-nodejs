@@ -876,22 +876,27 @@ module.exports = class Instagram {
     }).then(r => r.json());
   }
 
-  twoFactorAuth(code, essentialValues) {
-    console.log(code);
-    console.log(essentialValues);
-    var formdata = 'username=' + essentialValues.username + '&verificationCode=' + code + '&identifier=' + essentialValues.twoFactorIdentifier
-
+  twoFactorAuth(code, data) {
+    // var formdata = 'username=' + data.username + '&verificationCode=' + code + '&identifier=' + data.twoFactorIdentifier
+    var formdata = 'username=bobieistrafaguf&verificationCode=349867&identifier=nbeRPtsfTd';
+    
     var options = {
       method: 'POST',
       body: formdata,
-      headers: essentialValues
+      headers: this.combineWithBaseHeader(
+          {
+            'accept': '*/*',
+            'accept-encoding': 'gzip, deflate, br',
+            'csrftoken' : 'ZEgidLgqciQ4hPSjooVg6K0V53aVFwnp',
+            'referer' : "https://www.instagram.com/accounts/login/two_factor?next=%2F",
+            'origin': "https://www.instagram.com",
+            'cookie': "mid=XWDgWAAEAAHvy6t-pgdGXMCmlELy; fbm_124024574287414=base_domain=.instagram.com; datr=zfuHXbIrb7mAf-I1iRypi9EU; shbid=14149; shbts=1569200722.3405263; csrftoken=ZEgidLgqciQ4hPSjooVg6K0V53aVFwnp; rur=VLL; fbsr_124024574287414=dlslA5xZdV3yjxYlFdDlgXUbYrzOPQGNTTh0dl2-cYg.eyJ1c2VyX2lkIjoiMTAwMDAwMjQ0NTgyOTc5IiwiY29kZSI6IkFRRGN6b2luX184dVQxSEpQQWRlTmFVWEp0Y2d6T0hsTnRpOGpBMFkyZGZXbFp1WVFSOEFocXRnZlFwZzRJYTF3WDhPNFdiUWxpbTFDWUloZi1XZFhob1NCMUFhZGU2TXJrV20tdGwzejdFQjIxVExRT3NjMFllX28wQm0xTHhEWXp4OXY3Q2RpS0IwYzZZRnB0d2tyT3AtYkZpUkZjTm9waWdoR1pBX3BPUzN3WDlNUXVXZ2RlME9NTUdJRFhxYTYwMGRsZ1FKMnNuRlJxeVhYd29HODFZZVFlZWUza2J3enNVb3doU2I5clRQcHJZaHlEeURyc3lMOUhfQWc4bjFjMk9MQVlHa0N5eFFmNnliU19QbkJoMVRjUFJxVU92MHA1aHp0LWt4R3dlODlQUHJKTWdvZ3Z2Vi1HbklkRTZHOVJZRnU2bGlMdnJhZzBZU1BQQkN3cEloIiwib2F1dGhfdG9rZW4iOiJFQUFCd3pMaXhuallCQUZpcFNZV3pjQnNJRzRhV1pDeTNTc3lybk5VWkNaQkZpS1BZMlFocGZBZlpDWkFXa3dXNHIxQVVGUTR0WEZBU2FsdVpCZlZUWHZzVkJoeUdSZXBUMEVHbWxIRFNGZ25TbXAxTFdZZTdBb3hvN2pvR25sTDVROGZHYlBhRXphR05TU2hZZjFtdVFmWEZ0SVVrNmxGRXBHVmV0VmdKNzFnTTZMTHRrcFQxUHYiLCJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImlzc3VlZF9hdCI6MTU2OTI5NDc5NX0; urlgen=\"{\"124.104.179.197\": 9299}:1iCbGd:gBkP5m7nCRWwroNRrAfxIKtc48A\""
+          })
     }
 
     return fetch('https://www.instagram.com/accounts/login/ajax/two_factor/', options).then(
       async (t) => {
-        console.log(await t.json());
-        await this.updateEssentialValues(t.headers._headers['set-cookie']);
-        return this.essentialValues;
+        console.log(t);
       }).catch(() =>
         console.log('Instagram authentication failed (challenge required erro)')
       )
