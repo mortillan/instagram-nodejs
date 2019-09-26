@@ -398,6 +398,7 @@ module.exports = class Instagram {
                           'accept-encoding': 'gzip, deflate, br',
                           'content-type': 'application/x-www-form-urlencode',
                           'x-requested-with': 'XMLHttpRequest',
+                          'x-instagram-ajax': '1',
                           'x-csrftoken': this.csrfToken,
                           'referer' : username ? 'https://www.instagram.com/' + username : 'https://www.instagram.com',
                           'cookie': this.generateCookie()
@@ -406,7 +407,7 @@ module.exports = class Instagram {
       }).then(t =>
         t.json().then(r => r)
       )
-      .catch((err) => console.log(err))
+      .catch((err) => console.log('Instagram follow failed'))
   }
 
   /**
@@ -425,6 +426,7 @@ module.exports = class Instagram {
                           'accept-encoding': 'gzip, deflate, br',
                           'content-type': 'application/x-www-form-urlencode',
                           'x-requested-with': 'XMLHttpRequest',
+                          'x-instagram-ajax': '1',
                           'x-csrftoken': this.csrfToken,
                           'referer' : username ? 'https://www.instagram.com/' + username : 'https://www.instagram.com',
                           'cookie': this.generateCookie()
@@ -433,7 +435,7 @@ module.exports = class Instagram {
       }).then(t =>
         t.json().then(r => r)
       )
-      .catch((err) => console.log(err))
+      .catch((err) => console.log('Instagram unfollow failed'))
   } 
 
   followHashtags(hashTags) {
