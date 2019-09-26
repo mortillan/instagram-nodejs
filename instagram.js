@@ -406,6 +406,7 @@ module.exports = class Instagram {
       }).then(t =>
         t.json().then(r => r)
       )
+      .catch((err) => console.log(err))
   }
 
   /**
@@ -432,6 +433,7 @@ module.exports = class Instagram {
       }).then(t =>
         t.json().then(r => r)
       )
+      .catch((err) => console.log(err))
   } 
 
   followHashtags(hashTags) {
