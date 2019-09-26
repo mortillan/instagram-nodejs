@@ -403,9 +403,9 @@ module.exports = class Instagram {
                           'cookie': this.generateCookie()
                         }
                     )
-      }).then(res => {
-        return res;
-      });
+      }).then(t =>
+        t.json().then(r => r)
+      )
   }
 
   /**
@@ -429,9 +429,9 @@ module.exports = class Instagram {
                           'cookie': this.generateCookie()
                         }
                     )
-      }).then(res => {
-        return res;
-      });
+      }).then(t =>
+        t.json().then(r => r)
+      )
   } 
 
   followHashtags(hashTags) {
