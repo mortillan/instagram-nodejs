@@ -914,4 +914,13 @@ module.exports = class Instagram {
         console.log('Instagram authentication failed (challenge required erro)')
       )
   }
+
+  loadPage(page, headers) {
+    return fetch('https://www.instagram.com'+page,
+      {
+        'method': 'get',
+        'headers': headers
+      }).then(t => t.text())
+      .catch(() => console.log('Page "'+page+'" does not exist'));
+  }
 }
