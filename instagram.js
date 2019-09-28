@@ -392,18 +392,22 @@ module.exports = class Instagram {
     return fetch('https://www.instagram.com/web/friendships/' + userId + '/follow/',
       {
         'method': 'POST',
-        'headers': this.combineWithBaseHeader(
-                        {
-                          'accept': '*/*',
-                          'accept-encoding': 'gzip, deflate, br',
-                          'content-type': 'application/x-www-form-urlencode',
-                          'x-requested-with': 'XMLHttpRequest',
-                          'x-instagram-ajax': '1',
-                          'x-csrftoken': this.csrfToken,
-                          'referer' : username ? 'https://www.instagram.com/' + username : 'https://www.instagram.com',
-                          'cookie': this.generateCookie()
-                        }
-                    )
+        'headers': {
+                    'accept': '*/*',
+                    'accept-encoding' : 'gzip, deflate, br',
+                    'accept-language' : 'en-US,en;q=0.9,fil;q=0.8',
+                    'content-length' : 0,
+                    'content-type': 'application/json; charset=utf-8',
+                    'origin' : 'https://www.instagram.com',
+                    'referer' : username ? 'https://www.instagram.com/' + username : 'https://www.instagram.com/',
+                    'sec-fetch-mode' : 'cors',
+                    'sec-fetch-site' : 'same-origin',
+                    'user-agent' : this.userAgent,
+                    'x-csrftoken': this.csrfToken,
+                    'x-requested-with': 'XMLHttpRequest',
+                    'x-instagram-ajax': '1',
+                    'cookie': this.generateCookie()
+                  }
       }).then(t =>
         t.json().then(r => r)
       )
