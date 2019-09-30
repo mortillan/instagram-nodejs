@@ -919,7 +919,16 @@ module.exports = class Instagram {
     return fetch('https://www.instagram.com'+page,
       {
         'method': 'get',
-        'headers': this.getHeaders()
+        'headers': {
+          'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+          'accept-encoding' : 'gzip, deflate, br',
+          'accept-language' : 'en-US,en;q=0.9,fil;q=0.8',
+          'cookie' : this.generateCookie(),
+          'sec-fetch-mode' : 'navigate',
+          'sec-fetch-site' : 'none',
+          'upgrade-insecure-requests' : '1',
+          'user-agent' : this.userAgent
+        }
       }).then(t => t.text())
       .catch(() => console.log('Page "'+page+'" does not exist'));
   }
