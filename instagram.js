@@ -919,7 +919,7 @@ module.exports = class Instagram {
     return fetch('https://www.instagram.com'+page,
       {
         'method': 'get',
-        'headers': headers
+        'headers': this.getHeaders()
       }).then(t => t.text())
       .catch(() => console.log('Page "'+page+'" does not exist'));
   }
