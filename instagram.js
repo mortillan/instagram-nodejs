@@ -321,8 +321,16 @@ module.exports = class Instagram {
             this.twoFactorRequired = true;
             this.lastFourDigit = response.two_factor_info.obfuscated_phone_number;
             this.twoFactorIdentifier = response.two_factor_info.two_factor_identifier;
+
+            return {
+              status: '2fa',
+              response
+            }
           } else {
-            return response;
+            return {
+              status: 'blocked',
+              response
+            };
           }
         }
         if ( ("authenticated" in response && response.authenticated == false) 
